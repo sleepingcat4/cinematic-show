@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nelly</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap');
+
+        :root { 
+            --cream: #FFFDD0; 
+            --soft-glow: rgba(255, 253, 208, 0.3);
+            --winter-blue: #A5CAD2;
+            --deep-ice: #1B262C;
+        }
+
+        body { 
+            background: #000; color: var(--cream); 
+            font-family: 'Dancing Script', cursive; 
+            margin: 0; overflow-x: hidden; 
+        }
+
+        /* WINTER BLUE SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--deep-ice), var(--winter-blue), var(--deep-ice));
+            border-radius: 20px; border: 2px solid #000;
+        }
+
+        #blizzard-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 1000; }
+
+        #poem-stage, #intro-overlay {
+            position: fixed; inset: 0; z-index: 2000; background: #000;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+        }
+
+        .moon {
+            position: absolute; top: 15%; right: 15%; width: 70px; height: 70px;
+            background: #fdfae5; border-radius: 50%; box-shadow: 0 0 50px var(--soft-glow);
+        }
+        .moon::after { content: ""; position: absolute; top: -5%; left: -25%; width: 100%; height: 100%; background: #000; border-radius: 50%; }
+
+        /* Flash Overlay */
+        #white-flash {
+            position: fixed; inset: 0; background: #fff; z-index: 5000; opacity: 0; pointer-events: none;
+        }
+
+        .reveal-section { height: 300vh; position: relative; }
+
+        .image-container {
+            width: 100%; height: 100vh; position: sticky; top: 0;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+
+        .image-wrapper { width: 70vw; height: 80vh; overflow: hidden; filter: blur(60px) grayscale(1); }
+        .bg-img { width: 100%; height: 100%; background-size: cover; background-position: center; }
+
+        .content-box {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            z-index: 1100; opacity: 0; text-align: center; pointer-events: none; width: 100%;
+        }
+        .content-box h2 { font-size: 2.8rem; text-shadow: 0 0 25px rgba(0,0,0,0.95); }
+
+        #credits-stage {
+            height: 100vh; background: #000; position: relative;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; z-index: 2000;
+        }
+
+        .no-scroll { overflow: hidden !important; }
+    </style>
+</head>
+<body class="no-scroll">
+
+    <div id="white-flash"></div>
+    <canvas id="blizzard-canvas"></canvas>
+
+    <div id="intro-overlay">
+        <div class="space-y-4">
+            <div class="opacity-0 text-lg" id="chapter">Chapter 1.</div>
+            <h1 class="text-6xl opacity-0" id="main-title">Nelly</h1>
+        </div>
+    </div>
+
+    <div id="poem-stage" class="hidden">
+        <div class="moon"></div>
+        <div id="poem-text" class="text-2xl italic"></div>
+    </div>
+
+    <main id="gallery-main" class="opacity-0">
+        <section class="reveal-section"><div class="image-container"><div class="image-wrapper"><div class="bg-img" style="background-image: url('1.jpg');"></div></div></div><div class="content-box"><h2>My perfect girl</h2></div></section>
+        <section class="reveal-section"><div class="image-container"><div class="image-wrapper"><div class="bg-img" style="background-image: url('2.jpg');"></div></div></div><div class="content-box"><h2>I love your A cup</h2></div></section>
+        <section class="reveal-section"><div class="image-container"><div class="image-wrapper"><div class="bg-img" style="background-image: url('3.jpg');"></div></div></div><div class="content-box"><h2>Yummiest Ever</h2></div></section>
+        <section class="reveal-section"><div class="image-container"><div class="image-wrapper"><div class="bg-img" style="background-image: url('4.jpg');"></div></div></div><div class="content-box"><h2>Delicious</h2></div></section>
+        <section class="reveal-section"><div class="image-container"><div class="image-wrapper"><div class="bg-img" style="background-image: url('5.jpg');"></div></div></div><div class="content-box"><h2>Frozen Lust</h2></div></section>
+        <section class="reveal-section"><div class="image-container"><div class="image-wrapper"><div class="bg-img" style="background-image: url('7.jpg');"></div></div></div><div class="content-box"><h2>Perfect Details</h2></div></section>
+        <section class="reveal-section" id="final-photo-sec"><div class="image-container"><div class="image-wrapper"><div class="bg-img" style="background-image: url('10.jpg');"></div></div></div><div class="content-box"><h2>Gosh! Smarty & Attractive</h2></div></section>
+
+        <section id="credits-stage">
+            <div class="text-center space-y-6">
+                <div id="l1" class="text-xl font-light"></div>
+                <div id="l2" class="text-4xl font-bold"></div>
+                <button onclick="location.reload()" id="rb" class="opacity-0 pt-10 block w-full uppercase tracking-[0.3em] text-xs">Restart Journey</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Blizzard Canvas
+        const canvas = document.getElementById('blizzard-canvas');
+        const ctx = canvas.getContext('2d');
+        let flakes = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        function initSnow() {
+            resize();
+            flakes = Array.from({length: 400}, () => ({
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                size: Math.random() * 1.5, velY: Math.random() * 1 + 0.5, opacity: Math.random() * 0.5
+            }));
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "#FFFDD0";
+            flakes.forEach(f => {
+                ctx.globalAlpha = f.opacity;
+                ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI*2); ctx.fill();
+                f.y += f.velY; if(f.y > canvas.height) f.y = -5;
+            });
+            requestAnimationFrame(draw);
+        }
+        initSnow(); draw();
+
+        // Intro Logic (Initial Lock is set via body class)
+        const tl = gsap.timeline();
+        tl.to("#chapter", {opacity:1, duration:2}).to("#main-title", {opacity:1, duration:2}, "-=1")
+          .to("#intro-overlay", {opacity:0, display:"none", duration:2})
+          .set("#poem-stage", {display:"flex"}).add(() => {
+              let text = "Моей любимой Малышке", i=0;
+              const dest = document.getElementById('poem-text');
+              function type() {
+                  if(i < text.length) { dest.innerHTML += text[i++]; setTimeout(type, 130); }
+                  else { gsap.to("#poem-stage", {opacity:0, duration:2.5, delay:2.5, display:"none", onComplete: () => {
+                      document.body.classList.remove('no-scroll'); // Unlock scroll for gallery
+                      gsap.to("#gallery-main", {opacity:1, duration:2});
+                  }})}
+              }
+              type();
+          });
+
+        // Gallery Fade Logic
+        gsap.utils.toArray(".reveal-section").forEach((section) => {
+            const wrapper = section.querySelector(".image-wrapper");
+            const box = section.querySelector(".content-box");
+
+            gsap.to(wrapper, {
+                scrollTrigger: { trigger: section, start: "top bottom", end: "center center", scrub: 2 },
+                filter: "blur(0px) grayscale(0)"
+            });
+
+            gsap.timeline({
+                scrollTrigger: { trigger: section, start: "top 30%", end: "bottom 30%", scrub: 1.5 }
+            })
+            .to(box, { opacity: 1, duration: 1 })
+            .to(box, { opacity: 1, duration: 2 })
+            .to(box, { opacity: 0, duration: 1 });
+        });
+
+        // Final Flash & Credit Lock
+        ScrollTrigger.create({
+            trigger: "#credits-stage",
+            start: "top bottom",
+            onEnter: () => {
+                // Trigger White Flash
+                gsap.timeline()
+                    .to("#white-flash", {opacity: 1, duration: 0.4})
+                    .to("#white-flash", {opacity: 0, duration: 1.5});
+                
+                // Lockdown Scroll
+                document.body.classList.add('no-scroll');
+                window.scrollTo(0, document.body.scrollHeight);
+
+                // Run Typewriter
+                let s1 = "A Work By Hebrew Productions", s2 = "Designed By Ammar", i=0, j=0;
+                function t1() { if(i<s1.length){document.getElementById('l1').innerHTML+=s1[i++]; setTimeout(t1,120);}else{setTimeout(t2,600);}}
+                function t2() { if(j<s2.length){document.getElementById('l2').innerHTML+=s2[j++]; setTimeout(t2,120);}else{gsap.to("#rb",{opacity:1, duration:2})}}
+                t1();
+            }
+        });
+    </script>
+</body>
+</html>
